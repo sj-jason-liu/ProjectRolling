@@ -8,7 +8,12 @@ public class Somebody : MonoBehaviour
     private NavMeshAgent _navMeshAgent;
 
     [SerializeField]
+    private float _detectRange = 3f;
+
+    [SerializeField]
     private Transform _target;
+    [SerializeField]
+    private Transform _player;
 
     private Vector3 _originPosition;
 
@@ -40,9 +45,11 @@ public class Somebody : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        //if player moves toward them
+        //back to where it would go first
+        if (Vector3.Distance(transform.position, _player.position) < _detectRange)
         {
-            _isSomebodyNoticed = !_isSomebodyNoticed;
+            _isSomebodyNoticed = true;
         }
         
         switch(_isSomebodyNoticed)
@@ -55,5 +62,10 @@ public class Somebody : MonoBehaviour
                 _navMeshAgent.destination = _target.position;
                 break;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position, _detectRange);
     }
 }
