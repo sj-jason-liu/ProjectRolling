@@ -27,10 +27,14 @@ public class Player : MonoBehaviour
     void Update()
     {
         Moving();
+        transform.position =
+            new Vector3(Mathf.Clamp(transform.position.x, -9f, 9f), transform.position.y, Mathf.Clamp(transform.position.z, -9f, 6f));
     }
 
     void Moving()
     {
+        Vector3 position = transform.position;
+
         //get the horizontal and vertical input
         _horizontalInput = Input.GetAxisRaw("Horizontal");
         _verticalInput = Input.GetAxisRaw("Vertical");
@@ -52,7 +56,7 @@ public class Player : MonoBehaviour
         }
 
         //Limit the moveable area within a range
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x, -8f, 8f), transform.position.y, Mathf.Clamp(transform.position.z, -9.5f, 5f));
+        //transform.position = new Vector3(Mathf.Clamp(transform.position.x, -12f, 12f), transform.position.y, Mathf.Clamp(transform.position.z, -9.5f, 5f));
 
         //if left shift pressed
         //double the speed
@@ -65,7 +69,6 @@ public class Player : MonoBehaviour
             _speed /= 2f;
         }
 
-        move.y = _yVelocity;
         _controller.Move(move * _speed * Time.deltaTime);
     }
 
