@@ -10,10 +10,7 @@ public class Somebody : MonoBehaviour
     [SerializeField]
     private float _detectRange = 3f;
 
-    [SerializeField]
     private Transform _target;
-    [SerializeField]
-    private Transform _player;
 
     private Vector3 _originPosition;
 
@@ -44,14 +41,7 @@ public class Somebody : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        //if player moves toward them
-        //back to where it would go first
-        if (Vector3.Distance(transform.position, _player.position) < _detectRange)
-        {
-            _isSomebodyNoticed = true;
-        }
-        
+    {   
         switch(_isSomebodyNoticed)
         {
             case true:
@@ -62,6 +52,23 @@ public class Somebody : MonoBehaviour
                 _navMeshAgent.destination = _target.position;
                 break;
         }
+        if(Vector3.Distance(transform.position, _target.position) < 0.5f)
+        {
+            Destroy(gameObject, 3f);
+        }
+    }
+
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if(other.tag == "Player")
+    //    {
+    //        _isSomebodyNoticed = true;
+    //    }
+    //}
+
+    public void DestinationTarget(Transform targetPosition)
+    {
+        _target = targetPosition;
     }
 
     private void OnDrawGizmos()
