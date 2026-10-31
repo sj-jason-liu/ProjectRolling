@@ -10,6 +10,8 @@ public class Player : MonoBehaviour
     private float _verticalInput;
     private float _yVelocity;
     [SerializeField]
+    private float _gravity = 9.81f;
+    [SerializeField]
     private float _pickUpRate = 0.5f;
     private float _canPickUp = -1f;
 
@@ -42,9 +44,15 @@ public class Player : MonoBehaviour
         //set input value as a new Vector3
         Vector3 move = new Vector3(_horizontalInput, 0f, _verticalInput);
 
-        if (!_controller.isGrounded)
+        //apply gravity when in the air
+        //keep a small downward force when grounded so isGrounded stays stable
+        if (_controller.isGrounded && _yVelocity < 0f)
         {
-            _yVelocity -= 1f;
+            _yVelocity = -1f;
+        }
+        else
+        {
+            _yVelocity -= _gravity * Time.deltaTime;
         }
 
         //set the moving direction as facing target
@@ -69,7 +77,10 @@ public class Player : MonoBehaviour
             _speed /= 2f;
         }
 
-        _controller.Move(move * _speed * Time.deltaTime);
+        //horizontal movement plus vertical (gravity) velocity
+        Vector3 velocity = move * _speed;
+        velocity.y = _yVelocity;
+        _controller.Move(velocity * Time.deltaTime);
     }
 
     private void OnTriggerStay(Collider other)

@@ -4,12 +4,12 @@
 
 ## 目前階段
 早期 prototype（單一場景 `Prototype.unity`）。核心移動、撿放物品、路人生成、車輛往返、倒數計時已有雛形；尚無勝負/計分流程。
-本輪：建立團隊文件（CLAUDE.md / PROGRESS.md）並評估 Unity MCP 與引擎升級。
+本輪：在分支 `upgrade/unity6` 升級到 Unity 6000.3.27f1 並安裝 MCP for Unity。工作已完成但**尚未 commit**，等使用者在 Editor 實測後由 PM commit/merge。
 
 ## 團隊角色
 | 角色 | 負責 |
 |---|---|
-| PM（Claude） | 派工、協調、git commit/push |
+| PM（Claude） | 派工、協調、git commit/push/merge |
 | Gameplay Designer（Codex） | 遊戲系統企劃 |
 | Designer（Impeccable plugin） | 視覺 |
 | Engineer（Claude） | 程式實作、技術評估 |
@@ -25,49 +25,35 @@
 | `de9aaa8` | 車輛以 NavMeshAgent 移動 |
 | `66c4a2d` | 不用 collider 改用 clamp 限制玩家移動範圍；修正車輛重生 |
 | `2abb1ce` | 修正 SpawnManager 生成 Somebody 的問題 |
-| （未 commit） | 新增 `CLAUDE.md`、`PROGRESS.md`；完成 MCP/升級評估 |
+| `e67004e` | 新增 CLAUDE.md / PROGRESS.md；MCP 與引擎升級評估 |
+| （未 commit，`upgrade/unity6`） | 升級到 Unity 6000.3.27f1：batchmode 重新匯入，0 編譯錯誤 / 0 警告。套件自動更新；Unity 自動加入 `com.unity.ai.navigation` 2.0.16 與 `com.unity.multiplayer.center`；手動移除已淘汰的 `com.unity.ide.vscode` |
+| （未 commit） | 安裝 MCP for Unity（`com.coplaydev.unity-mcp`，git URL 鎖定 `#v10.3.0`，最低 Unity 2021.3）；用 winget 安裝 uv 0.13.6；新增專案層級 `.mcp.json`（HTTP，`UnityMCP` → `http://localhost:8080/mcp`） |
+| （未 commit） | 修 bug：Player 重力（`_gravity * Time.deltaTime` 累加、落地重設為 -1、套用到 `Move`）；SpawnManager 改用 `_startPosition.Length` / `_endPosition.Length` |
+| （未 commit） | `.gitignore` 補上 `UserSettings/`、`Recordings/`、`*.slnx`、`.idea/`、`.vscode/`、`.claude/settings.local.json` 等 |
+| 驗證 | batchmode 開啟場景：`NavMesh.CalculateTriangulation()` 有 96 個頂點 / 42 個三角形，Car 的 NavMeshAgent 在 NavMesh 上 → 舊 NavMesh 在 Unity 6 可直接使用，**不需要重新烘焙** |
 
 ## 決策
-
-### [待使用者決定] Unity MCP 與引擎升級
-**MCP 選項比較**
-
-| 選項 | 最低 Unity 版本 | 能用於 2019.4？ | 設定成本 |
-|---|---|---|---|
-| CoplayDev/unity-mcp（MCP for Unity） | 2021.3 LTS（package.json 宣告） | ❌ | 低：UPM 用 git URL 安裝 + Python 3.10 / uv，有自動設定 Claude Code 的視窗。免費、開源、社群最活躍 |
-| Unity 官方（`com.unity.ai.assistant` 內建 Unity MCP Server） | Unity 6（6000.0）+ | ❌ | 低：裝套件後 bridge 自動啟動，client 指向 `~/.unity/relay/relay_win.exe --mcp`，首次連線需在 Project Settings 核准。官方維護；需確認是否需要 Unity 帳號/AI 方案 |
-| IvanMurzak/Unity-MCP | 2022.3（舊版文件寫 2021.3） | ❌ | 中 |
-| CoderGamester/mcp-unity | 2021.3 或 Unity 6（來源不一致） | ❌ | 中：需 Node.js 18+ |
-| ibelongedtoyou/unity-mcp-2019（CoplayDev 的社群 fork） | 2019.4 | ⚠️ 理論上可以 | 中；**未經 CoplayDev 背書、無回報、完整度未知**，不建議 |
-
-結論：沒有任何主流 MCP 支援 2019.4，要用 MCP 基本上必須升級。
-
-**升級到新版 LTS 的風險評估**（專案很小：6 支腳本、1 場景、2 prefab，沒有第三方套件）
-
-| 項目 | 2021.3 | 2022.3 | Unity 6 |
-|---|---|---|---|
-| Built-in RP | 正常 | 正常 | 仍可用（Unity 已表示未來會淘汰，但目前不影響） |
-| NavMesh（`NavMeshAgent` + 已烘焙的 `NavMesh.asset`） | 正常 | runtime 正常；舊的 Navigation 烘焙視窗變成「Obsolete」，要重新烘焙建議裝 `com.unity.ai.navigation` | 同 2022.3，重新烘焙應改用 AI Navigation 套件（NavMeshSurface） |
-| 舊版 Input Manager | 正常 | 正常 | 正常（升級的專案會保留 Old input；只有新專案預設 Input System） |
-| `UnityEngine.UI.Text` | 正常 | 正常 | 仍可用，但在 uGUI 2.0 中標為 Legacy；TMP 併入 ugui 套件 |
-| 套件 | collab-proxy/ide 套件自動更新 | 同左；`ide.vscode` 已淘汰可移除 | TMP/ugui 合併、collab-proxy → Unity Version Control，自動處理 |
-| 腳本 API | 沒有會壞的 API | 同左 | 同左（目前用的 API 都還在） |
-
-預期會壞/要處理的：只有重新烘焙 NavMesh 的流程（2022.3+）、套件版本更新、Android 建置設定（最低 API level / Gradle 變更，目前還沒在建置所以影響小）。升級會重新序列化所有資產，**不可逆**，必須在 git 分支上做。整體風險：**低**。
-
-**建議（Engineer）**：在新分支升級到**最新的 Unity 6 LTS**，同時裝 **CoplayDev/unity-mcp**（免費、不綁 Unity AI 方案、文件與社群最完整）；Unity 官方 MCP 當備案。理由：專案早期、內容少，越晚升級成本越高；Unity 6 是目前主要支援的 LTS，兩種主流 MCP 都能用。若使用者不想升級：不要用 MCP，維持「Claude 改腳本、使用者在 Editor 裡測試」的流程（不建議用 2019 社群 fork）。
-→ **等使用者決定**：(a) 升級到 Unity 6 LTS + CoplayDev MCP（建議）；(b) 升級到 2022.3 LTS；(c) 維持 2019.4，不用 MCP。
+- **[已決定 2026-10-31] 選項 (a)：升級到 Unity 6 LTS（6000.3.27f1）+ CoplayDev/unity-mcp。** 使用者核准。
+  - MCP 走 HTTP transport + 專案根目錄 `.mcp.json`：所有 Claude Code 分頁可同時共用同一個 Unity Editor（stdio 模式一次只能一個 client）。
+  - 套件鎖定 `v10.3.0` tag，不追 `#main`，避免上游更新突然壞掉；要升級時改 manifest 的 tag。
+  - NavMesh 維持舊版烘焙資料；之後若要改場景地形或重新烘焙，改用 AI Navigation 的 NavMeshSurface。
+  - 備案：Unity 官方 MCP（`com.unity.ai.assistant`，需 Unity 6）。
+- 先前評估（2019.4 時）：主流 MCP 都不支援 2019.4，要用 MCP 就得升級；升級風險低（專案小、沒有第三方套件）。
 
 ## 未解問題
-1. **Player 落地問題**：`Player.Moving()` 中 `_yVelocity` 不在地面時會一直累加（`-= 1f`），但從來沒有套用到 `move`，所以重力不會生效；而且落地後也不會重設，每幀累加也沒乘 `Time.deltaTime`。
-2. **SpawnManager 寫死範圍**：`Random.Range(0, 3)` 應改成 `_startPosition.Length` / `_endPosition.Length`，否則陣列不是 3 個時會越界或用不到某些點。
+1. ~~Player 落地問題~~：已在 `upgrade/unity6` 修正（未 commit，待 Editor 實測）。
+2. ~~SpawnManager 寫死範圍~~：已修正（未 commit）。
 3. **Timer 結束後沒有行為**：時間到只設 `GameManager.IsTimeGoing = false` 並 log，沒有任何系統讀取它（生成/車輛/玩家都不會停），也沒有結算。
 4. **Somebody 躲避未啟用**：`OnTriggerEnter` 被註解掉，`_isSomebodyNoticed` 永遠不會變成 true；`_detectRange` 只用在 Gizmo；`_controller` 欄位沒用到。
-5. （次要）Player 旋轉用 `_speed` 當每幀旋轉角度，速度跟旋轉耦合且跟 frame rate 有關。
+5. （次要）Player 旋轉用 `_speed` 當每幀旋轉角度，速度跟旋轉綁在一起，而且受 frame rate 影響。
 6. （次要）CarMoves 每幀呼叫 `SetDestination`。
+7. （待確認）Player 在 `Update` 直接改 `transform.position` 做範圍 clamp，但 `Physics.autoSyncTransforms` 為 0，CharacterController 可能不會同步到 clamp 後的位置。2019 時就是這樣寫的，請在 Editor 實測邊界行為。
+8. （待處理）場景與 prefab 還是 2019 的序列化格式；在 Editor 裡存檔時才會轉成新格式，到時會出現一大批 YAML diff，屬正常現象。
+9. （待確認）專案根目錄出現空資料夾 `Docs/Design/`（2026-10-31 12:02 建立，不是 Engineer 建的，可能是 Designer）。
 
 ## 下一步
-1. 使用者決定 MCP/升級方案（見決策）。
-2. 修正未解問題 1–2（Engineer，小改動）。
-3. Gameplay Designer 定義 Timer 結束後的遊戲流程（勝負/計分），再由 Engineer 實作問題 3。
-4. 確認 Somebody 躲避玩家的設計後重新啟用（問題 4）。
+1. **使用者在 Editor 手動操作**：用 Unity 6000.3.27f1 開專案 → Window → MCP for Unity 確認 uv/Python 都是綠燈 → 按 Start Server（建議勾 Auto-Start）→ Claude Code 執行 `/mcp` 確認 `UnityMCP` 已連線。
+2. 使用者實測 Play：玩家會貼地、不會浮空，走出平台邊緣會往下掉；路人正常生成；車子正常往返。
+3. 實測通過後 PM commit 並 merge `upgrade/unity6` → main（建議另外在 Editor 開場景存一次，讓場景序列化格式的 diff 單獨成一個 commit）。
+4. Gameplay Designer 定義 Timer 結束後的遊戲流程（勝負/計分），再由 Engineer 實作問題 3。
+5. 確認 Somebody 躲避玩家的設計後重新啟用（問題 4）。

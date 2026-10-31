@@ -35,8 +35,8 @@ public class SpawnManager : MonoBehaviour
         {
             while(_isSpawning)
             {
-                int startIndex = Random.Range(0, 3);
-                int endIndex = Random.Range(0, 3);
+                int startIndex = Random.Range(0, _startPosition.Length);
+                int endIndex = Random.Range(0, _endPosition.Length);
                 GameObject spawnedPerson = Instantiate(_peoplePrefab, _startPosition[startIndex].position, transform.rotation);
                 spawnedPerson.GetComponent<Somebody>().DestinationTarget(_endPosition[endIndex]);
                 yield return new WaitForSeconds(Random.Range(2f, 7f));
