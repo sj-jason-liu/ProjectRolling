@@ -1,10 +1,21 @@
 # PROGRESS.md — Project Rolling 進度紀錄
 
-> context 被清掉後從這裡接續工作。每次完成任務後更新對應段落。最後更新：2026-10-31（Engineer）
+> context 被清掉後從這裡接續工作。每次完成任務後更新對應段落。最後更新：2026-10-31（PM）
 
 ## 目前階段
 早期 prototype（單一場景 `Prototype.unity`）。核心移動、撿放物品、路人生成、車輛往返、倒數計時已有雛形；尚無勝負/計分流程。
-本輪：在分支 `upgrade/unity6` 升級到 Unity 6000.3.27f1 並安裝 MCP for Unity。工作已完成但**尚未 commit**，等使用者在 Editor 實測後由 PM commit/merge。
+本輪（2026-10-31 結束）：分支 `upgrade/unity6` 已完成 Unity 6000.3.27f1 升級 + MCP for Unity + 兩個 bug 修正，並加入使用者 GDD v0.2 與對齊 GDD 的第一切片設計 `Docs/Design/GameLoop.md`。全部已 commit 並 push 到 `origin/upgrade/unity6`（尚未 merge 回 main）。
+
+### ⏸ 下次開工時 PM 必須先向使用者確認的待決事項
+**A. Unity 6 升級的 Editor 實測（使用者手動）**：用 6000.3.27f1 開專案 → Window → MCP for Unity 確認 uv/Python 綠燈 → Start Server（建議勾 Auto-Start；不要按 Claude Code 的 Configure）→ `/mcp` 確認 UnityMCP 連線 → Play 測：玩家貼地/邊緣會掉落、路人生成、車子往返、移動邊界是否正確。通過後 PM 才 merge `upgrade/unity6` → main（Editor 存檔產生的場景 YAML diff 另開一個 commit）。
+
+**B. 第一切片設計 `Docs/Design/GameLoop.md` 的 6 個待確認問題**（確認後才派 Engineer 實作）：
+1. 時間：準備 45 秒／每 Take 有效拍攝 20 秒／全局 120 秒？準備到點自動 Action，或清場完可提早開拍？
+2. 重拍：NG 至少整理 5 秒、只受全局時間限制（不設次數上限）？玩家本人入鏡算 NG 嗎？
+3. 原型輸入：先用鍵盤（WASD、E 撿放、F 請離開／按住舉牌），觸控留後續？
+4. 首片內容量：三類任務＋三種 NPC＋汽機車＋兩種交管全放？3 件雜物／6 位 NPC／4 次車流是否合適，或先縮減？
+5. 設備停拍：停拍 2 秒、保留 Take 進度、期間入鏡照常 NG？
+6. 評星：任務／時間／失誤權重 50／30／20、2 星 60 分、3 星 85 分？時間耗盡未完成鏡頭給 1 星或 0 星？
 
 ## 團隊角色
 | 角色 | 負責 |
@@ -26,10 +37,12 @@
 | `66c4a2d` | 不用 collider 改用 clamp 限制玩家移動範圍；修正車輛重生 |
 | `2abb1ce` | 修正 SpawnManager 生成 Somebody 的問題 |
 | `e67004e` | 新增 CLAUDE.md / PROGRESS.md；MCP 與引擎升級評估 |
-| （未 commit，`upgrade/unity6`） | 升級到 Unity 6000.3.27f1：batchmode 重新匯入，0 編譯錯誤 / 0 警告。套件自動更新；Unity 自動加入 `com.unity.ai.navigation` 2.0.16 與 `com.unity.multiplayer.center`；手動移除已淘汰的 `com.unity.ide.vscode` |
-| （未 commit） | 安裝 MCP for Unity（`com.coplaydev.unity-mcp`，git URL 鎖定 `#v10.3.0`，最低 Unity 2021.3）；用 winget 安裝 uv 0.13.6；新增專案層級 `.mcp.json`（HTTP，`UnityMCP` → `http://localhost:8080/mcp`） |
-| （未 commit） | 修 bug：Player 重力（`_gravity * Time.deltaTime` 累加、落地重設為 -1、套用到 `Move`）；SpawnManager 改用 `_startPosition.Length` / `_endPosition.Length` |
-| （未 commit） | `.gitignore` 補上 `UserSettings/`、`Recordings/`、`*.slnx`、`.idea/`、`.vscode/`、`.claude/settings.local.json` 等 |
+| `3a703b1` | 升級到 Unity 6000.3.27f1：batchmode 重新匯入，0 編譯錯誤 / 0 警告。套件自動更新；Unity 自動加入 `com.unity.ai.navigation` 2.0.16 與 `com.unity.multiplayer.center`；手動移除已淘汰的 `com.unity.ide.vscode` |
+| `3a703b1` | 安裝 MCP for Unity（`com.coplaydev.unity-mcp`，git URL 鎖定 `#v10.3.0`，最低 Unity 2021.3）；用 winget 安裝 uv 0.13.6；新增專案層級 `.mcp.json`（HTTP，`UnityMCP` → `http://localhost:8080/mcp`） |
+| `3a703b1` | 修 bug：Player 重力（`_gravity * Time.deltaTime` 累加、落地重設為 -1、套用到 `Move`）；SpawnManager 改用 `_startPosition.Length` / `_endPosition.Length` |
+| `3a703b1` | `.gitignore` 補上 `UserSettings/`、`Recordings/`、`*.slnx`、`.idea/`、`.vscode/`、`.claude/settings.local.json` 等 |
+| `607f749` | Gameplay Designer 第一版遊戲循環草案（已被 5369c45 取代） |
+| `5369c45` | 加入使用者 GDD（`GDD_台灣電影拍攝現場.md`）v0.2：引擎改 Unity 6、美術改 3D；`Docs/Design/GameLoop.md` 改寫為忠於 GDD 的單人第一切片（假設 A1–A21 待確認） |
 | 驗證 | batchmode 開啟場景：`NavMesh.CalculateTriangulation()` 有 96 個頂點 / 42 個三角形，Car 的 NavMeshAgent 在 NavMesh 上 → 舊 NavMesh 在 Unity 6 可直接使用，**不需要重新烘焙** |
 
 ## 決策
@@ -42,19 +55,18 @@
 - 先前評估（2019.4 時）：主流 MCP 都不支援 2019.4，要用 MCP 就得升級；升級風險低（專案小、沒有第三方套件）。
 
 ## 未解問題
-1. ~~Player 落地問題~~：已在 `upgrade/unity6` 修正（未 commit，待 Editor 實測）。
-2. ~~SpawnManager 寫死範圍~~：已修正（未 commit）。
-3. **Timer 結束後沒有行為**：時間到只設 `GameManager.IsTimeGoing = false` 並 log，沒有任何系統讀取它（生成/車輛/玩家都不會停），也沒有結算。
+1. ~~Player 落地問題~~：已修正（`3a703b1`，待 Editor 實測）。
+2. ~~SpawnManager 寫死範圍~~：已修正（`3a703b1`）。
+3. **Timer 結束後沒有行為**（設計已在 GameLoop.md 定義，待使用者確認後實作）：時間到只設 `GameManager.IsTimeGoing = false` 並 log，沒有任何系統讀取它（生成/車輛/玩家都不會停），也沒有結算。
 4. **Somebody 躲避未啟用**：`OnTriggerEnter` 被註解掉，`_isSomebodyNoticed` 永遠不會變成 true；`_detectRange` 只用在 Gizmo；`_controller` 欄位沒用到。
 5. （次要）Player 旋轉用 `_speed` 當每幀旋轉角度，速度跟旋轉綁在一起，而且受 frame rate 影響。
 6. （次要）CarMoves 每幀呼叫 `SetDestination`。
 7. （待確認）Player 在 `Update` 直接改 `transform.position` 做範圍 clamp，但 `Physics.autoSyncTransforms` 為 0，CharacterController 可能不會同步到 clamp 後的位置。2019 時就是這樣寫的，請在 Editor 實測邊界行為。
 8. （待處理）場景與 prefab 還是 2019 的序列化格式；在 Editor 裡存檔時才會轉成新格式，到時會出現一大批 YAML diff，屬正常現象。
-9. （待確認）專案根目錄出現空資料夾 `Docs/Design/`（2026-10-31 12:02 建立，不是 Engineer 建的，可能是 Designer）。
+9. ~~Docs/Design/ 空資料夾~~：是 Gameplay Designer 建的，已放入 GameLoop.md。
 
 ## 下一步
-1. **使用者在 Editor 手動操作**：用 Unity 6000.3.27f1 開專案 → Window → MCP for Unity 確認 uv/Python 都是綠燈 → 按 Start Server（建議勾 Auto-Start）→ Claude Code 執行 `/mcp` 確認 `UnityMCP` 已連線。
-2. 使用者實測 Play：玩家會貼地、不會浮空，走出平台邊緣會往下掉；路人正常生成；車子正常往返。
-3. 實測通過後 PM commit 並 merge `upgrade/unity6` → main（建議另外在 Editor 開場景存一次，讓場景序列化格式的 diff 單獨成一個 commit）。
-4. Gameplay Designer 定義 Timer 結束後的遊戲流程（勝負/計分），再由 Engineer 實作問題 3。
-5. 確認 Somebody 躲避玩家的設計後重新啟用（問題 4）。
+1. 下次開工：PM 先向使用者確認「目前階段」中的待決事項 A（Editor 實測）與 B（6 個設計問題）。
+2. A 通過 → PM merge `upgrade/unity6` → main。
+3. B 確認 → Gameplay Designer 依回覆定稿 GameLoop.md → Engineer 依定稿實作第一切片（GameManager 狀態機、計時、任務帳本、交管、NPC 疏散、雜物、設備停拍、結算 UI）。
+4. Designer（Impeccable 已安裝，首次派工前需 `/reload-plugins`）可依 GDD 美術方向（3D 低多邊形、chibi、台灣街景色調、固定俯視）提出視覺方向。
