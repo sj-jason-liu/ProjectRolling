@@ -78,3 +78,6 @@ Thumbs.db
 
 # Unity 6 generated solution format
 *.slnx
+
+# Windows folder settings
+desktop.ini
