@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
@@ -20,10 +21,52 @@ public class Player : MonoBehaviour
     private GameObject _itemHolder;
 
     [SerializeField] private bool _isHolding;
+
+    //input actions asset (Assets/Input/PlayerControls.inputactions), action map "Player"
+    [SerializeField]
+    private InputActionAsset _inputActions;
+    private InputActionMap _playerActionMap;
+    private InputAction _moveAction;
+    private InputAction _sprintAction;
+    private InputAction _interactAction;
     
     void Start()
     {
         _controller = GetComponent<CharacterController>();
+        if (_controller == null)
+        {
+            Debug.LogError("CharacterController is NULL!");
+        }
+
+        if (_inputActions == null)
+        {
+            Debug.LogError("Input Actions is NULL!");
+            return;
+        }
+
+        //find the actions in the "Player" map and enable it
+        _playerActionMap = _inputActions.FindActionMap("Player", true);
+        _moveAction = _playerActionMap.FindAction("Move", true);
+        _sprintAction = _playerActionMap.FindAction("Sprint", true);
+        _interactAction = _playerActionMap.FindAction("Interact", true);
+        _playerActionMap.Enable();
+    }
+
+    private void OnEnable()
+    {
+        //re-enable after being disabled (first enable happens in Start)
+        if (_playerActionMap != null)
+        {
+            _playerActionMap.Enable();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_playerActionMap != null)
+        {
+            _playerActionMap.Disable();
+        }
     }
 
     void Update()
@@ -38,8 +81,10 @@ public class Player : MonoBehaviour
         Vector3 position = transform.position;
 
         //get the horizontal and vertical input
-        _horizontalInput = Input.GetAxisRaw("Horizontal");
-        _verticalInput = Input.GetAxisRaw("Vertical");
+        //(composite mode = Digital, so diagonal is not normalized, same as GetAxisRaw)
+        Vector2 moveInput = _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
+        _horizontalInput = moveInput.x;
+        _verticalInput = moveInput.y;
 
         //set input value as a new Vector3
         Vector3 move = new Vector3(_horizontalInput, 0f, _verticalInput);
@@ -68,11 +113,11 @@ public class Player : MonoBehaviour
 
         //if left shift pressed
         //double the speed
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (_sprintAction != null && _sprintAction.WasPressedThisFrame())
         {
             _speed *= 2f;
         }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        else if (_sprintAction != null && _sprintAction.WasReleasedThisFrame())
         {
             _speed /= 2f;
         }
@@ -87,7 +132,7 @@ public class Player : MonoBehaviour
     {
         if(other.tag == "Item")
         {
-            if(Input.GetKey(KeyCode.E) && Time.time > _canPickUp)
+            if(_interactAction != null && _interactAction.IsPressed() && Time.time > _canPickUp)
             {
                 if(!_isHolding)
                 {
