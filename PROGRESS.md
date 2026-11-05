@@ -46,6 +46,8 @@
 | `3a703b1` | `.gitignore` 補上 `UserSettings/`、`Recordings/`、`*.slnx`、`.idea/`、`.vscode/`、`.claude/settings.local.json` 等 |
 | `607f749` | Gameplay Designer 第一版遊戲循環草案（已被 5369c45 取代） |
 | `5369c45` | 加入使用者 GDD（`GDD_台灣電影拍攝現場.md`）v0.2：引擎改 Unity 6、美術改 3D；`Docs/Design/GameLoop.md` 改寫為忠於 GDD 的單人第一切片（假設 A1–A21 待確認） |
+| `f203987` `c949601` | Mac 環境文件更新；MCP 設定改由插件管理（`.mcp.json` 清空、`~/.claude.json` local scope → `127.0.0.1:8181`） |
+| `8112037` | 改用新 Input System（`com.unity.inputsystem` 1.20.1，Active Input Handling = 新版 only）：新增 `Assets/Input/PlayerControls.inputactions`（Move/Sprint/Interact，鍵盤＋搖桿，Touch scheme 預留空殼）、`Player.cs` 改讀 action、EventSystem 換 `InputSystemUIInputModule`。使用者 Play 實測移動/加速/撿放正常。場景與 prefab 首次以 Unity 6 存檔，diff 含大量序列化重寫 |
 | 驗證 | batchmode 開啟場景：`NavMesh.CalculateTriangulation()` 有 96 個頂點 / 42 個三角形，Car 的 NavMeshAgent 在 NavMesh 上 → 舊 NavMesh 在 Unity 6 可直接使用，**不需要重新烘焙** |
 
 ## 決策
@@ -65,9 +67,12 @@
 4. **Somebody 躲避未啟用**：`OnTriggerEnter` 被註解掉，`_isSomebodyNoticed` 永遠不會變成 true；`_detectRange` 只用在 Gizmo；`_controller` 欄位沒用到。
 5. （次要）Player 旋轉用 `_speed` 當每幀旋轉角度，速度跟旋轉綁在一起，而且受 frame rate 影響。
 6. （次要）CarMoves 每幀呼叫 `SetDestination`。
-7. （待確認）Player 在 `Update` 直接改 `transform.position` 做範圍 clamp，但 `Physics.autoSyncTransforms` 為 0，CharacterController 可能不會同步到 clamp 後的位置。2019 時就是這樣寫的，請在 Editor 實測邊界行為。
+7. **移動邊界過小**（2026-11-05 使用者實測）：玩家貼地、邊緣不會掉，但活動範圍感覺比地板小、像有隱形牆。來源是 `Player.cs` 寫死的 clamp x∈[-9,9]、z∈[-9,6]（`ac12191` 擴大地板後沒跟著調整）。另外 `Physics.autoSyncTransforms` 為 0，直接改 `transform.position` 可能不同步到 CharacterController。待決定新範圍（或改用碰撞邊界）。
 8. （待處理）場景與 prefab 還是 2019 的序列化格式；在 Editor 裡存檔時才會轉成新格式，到時會出現一大批 YAML diff，屬正常現象。
 9. ~~Docs/Design/ 空資料夾~~：是 Gameplay Designer 建的，已放入 GameLoop.md。
+10. **路人與車子只有單向移動**（2026-11-05 使用者實測回報）：符合目前程式設計（Somebody 走到終點 3 秒後銷毀；Car 開到 B 後瞬移回 A），待使用者確認期望行為。
+11. （次要，Engineer 2026-11-05 發現）Sprint 用「按下 ×2、放開 ÷2」：放開那幀沒偵測到（例如切換視窗）會卡在 2 倍，再按變 4 倍；Player 同時掛 CharacterController 與 kinematic Rigidbody。
+12. （次要）Console 有 2 則 `Can't Generate Mesh, No Font Asset has been assigned.`（TextMeshPro 元件缺字型），來源待查。
 
 ## 下一步
 1. 下次開工：PM 先向使用者確認「目前階段」中的待決事項 A（Editor 實測）與 B（6 個設計問題）。
