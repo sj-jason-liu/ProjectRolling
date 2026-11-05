@@ -5,6 +5,7 @@
 ## 專案概要
 Project Rolling：手機平台的「電影拍攝助理」模擬遊戲，目前是早期 prototype。
 - Unity **6000.3.27f1**（Unity 6 LTS；2026-10-31 從 2019.4.29f1 升級；見 `ProjectSettings/ProjectVersion.txt`）
+- 開發環境：**macOS（Apple Silicon）**，專案路徑 `/Users/mouse76229/Dev Projects/ProjectRolling`（2026-11 從 Windows 移過來）
 - Built-in Render Pipeline、舊版 Input Manager（`Input.GetAxisRaw` / `GetKey`）
 - NavMesh：runtime 用 `UnityEngine.AI.NavMeshAgent`；場景仍使用舊版烘焙的 `NavMesh.asset`（Unity 6 可正常載入）。已裝 `com.unity.ai.navigation` 2.0.16，日後重新烘焙請用 NavMeshSurface。
 - UI 用 `UnityEngine.UI.Text`（Unity 6 中標為 Legacy，仍可用；TMP 已併入 ugui 2.0）
@@ -44,18 +45,20 @@ Packages/manifest.json          套件清單
 
 ## 開啟與執行
 1. Unity Hub 安裝 **6000.3.27f1**。必須用這個版本開，用其他版本開會再次觸發升級。
-2. 以 Unity Hub 開啟專案根目錄 `C:\Unity Projects\Project Rolling`。
+2. 以 Unity Hub 開啟專案根目錄 `/Users/mouse76229/Dev Projects/ProjectRolling`。
 3. 開啟 `Assets/Scenes/Prototype.unity`，按 Play。操作：WASD 移動、Left Shift 加速、E 撿/放物品。
 4. 目前沒有自動化測試（test-framework 已裝但未使用）。
 5. Headless 編譯檢查（Editor 必須先關閉，同一專案不能同時開兩個 Unity）：
    ```
-   "C:\Program Files\Unity\Hub\Editor\6000.3.27f1\Editor\Unity.exe" -batchmode -quit -projectPath "C:\Unity Projects\Project Rolling" -logFile <log>
+   "/Applications/Unity/Hub/Editor/6000.3.27f1/Unity.app/Contents/MacOS/Unity" -batchmode -quit -projectPath "/Users/mouse76229/Dev Projects/ProjectRolling" -logFile <log>
    ```
    之後在 log 中搜尋 `error CS`；看到 `Exiting batchmode successfully` 表示成功。
 
 ## Unity MCP（MCP for Unity）
 - 專案根目錄的 `.mcp.json` 用 HTTP 連到 `http://localhost:8080/mcp`（server 名稱 `UnityMCP`），本專案所有 Claude Code 分頁共用。HTTP 模式支援多個 client 同時連線。
-- 前置需求：`uv`/`uvx`（已用 winget 裝在 `%LOCALAPPDATA%\Microsoft\WinGet\Links`）、Python 3.10+。
+- 前置需求：`uv`/`uvx`（裝在 `~/.local/bin`）、Python 3.10+（Homebrew `/opt/homebrew/bin/python3`）。
+- Editor 執行時的 log：`~/Library/Logs/Unity/Editor.log`（MCP 狀態訊息以 `MCP-FOR-UNITY` 開頭）。
+- 注意：本機 Docker 在 `100.64.13.57:8080` 監聽（非 127.0.0.1）。若 Start Server 失敗並回報 port 被占用，先查 `lsof -nP -iTCP:8080 -sTCP:LISTEN`。
 - 使用前要先用 Unity Editor 開著此專案，並在 **Window → MCP for Unity** 按 **Start Server**（或在 Advanced 勾選 *Auto-Start Server on Editor Load*）。狀態顯示 `Connected` 後，在 Claude Code 用 `/mcp` 確認 `UnityMCP` 已連線。
 - **不需要**在該視窗對 Claude Code 按 Configure。它會另外用 `claude mcp add --scope local` 寫一份設定，本專案已經用 `.mcp.json` 了。
 - Editor 開著時不能跑上面的 batchmode 檢查；Editor 開著時改用 MCP 讀 Console。

@@ -1,6 +1,6 @@
 # PROGRESS.md — Project Rolling 進度紀錄
 
-> context 被清掉後從這裡接續工作。每次完成任務後更新對應段落。最後更新：2026-10-31（PM）
+> context 被清掉後從這裡接續工作。每次完成任務後更新對應段落。最後更新：2026-11-05（PM）
 
 ## 目前階段
 早期 prototype（單一場景 `Prototype.unity`）。核心移動、撿放物品、路人生成、車輛往返、倒數計時已有雛形；尚無勝負/計分流程。
@@ -17,7 +17,8 @@
 5. 設備停拍：停拍 2 秒、保留 Take 進度、期間入鏡照常 NG？
 6. 評星：任務／時間／失誤權重 50／30／20、2 星 60 分、3 星 85 分？時間耗盡未完成鏡頭給 1 星或 0 星？
 
-**C. 轉移到 Mac（規劃中，尚未執行）**：完整步驟見 `Docs/MacMigration.md`。目前仍在 Windows 本地繼續開發。
+**C. ~~轉移到 Mac~~：已完成（2026-11-05 確認）。** 開發改在 macOS：專案在 `/Users/mouse76229/Dev Projects/ProjectRolling`，Unity 6000.3.27f1 已裝在 `/Applications/Unity/Hub/Editor/`，Editor 已能開啟專案（0 編譯錯誤）。`uv`/`uvx` 在 `~/.local/bin`；git 認證改用 `osxkeychain`，`gh` 已安裝；herdr 分工已在 workspace `w5` 重建（PM `w5:p1`、Gameplay Designer `w5:p2` codex、Designer `w5:p3`、Engineer `w5:p4`；IT 不建）。`.mcp.json` 是 commit 版（UnityMCP → `localhost:8080/mcp`）。CLAUDE.md 的 Windows 路徑已改成 Mac 路徑。
+   - 未完成：MCP for Unity 的 Server 尚未 Start，所以 UnityMCP 還沒連上（Window → MCP for Unity → Start Server，建議勾選 Auto-Start）。
 
 ## 團隊角色
 | 角色 | 負責 |
