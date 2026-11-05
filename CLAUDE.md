@@ -20,7 +20,7 @@ Assets/
   Prefabs/                      Player, Somebody
   Materials/                    Floor, Item, People, Road
 Packages/manifest.json          套件清單
-.mcp.json                       Claude Code 專案層級 MCP 設定（UnityMCP）
+.mcp.json                       由 MCP for Unity 插件自動清空（`{"mcpServers": {}}`），不要手動加回設定
 ```
 `Library/`、`Temp/`、`obj/`、`Logs/`、`UserSettings/` 與 `.csproj/.sln/.slnx` 都是自動產生的，不要手改。
 
@@ -55,12 +55,13 @@ Packages/manifest.json          套件清單
    之後在 log 中搜尋 `error CS`；看到 `Exiting batchmode successfully` 表示成功。
 
 ## Unity MCP（MCP for Unity）
-- 專案根目錄的 `.mcp.json` 用 HTTP 連到 `http://localhost:8080/mcp`（server 名稱 `UnityMCP`），本專案所有 Claude Code 分頁共用。HTTP 模式支援多個 client 同時連線。
+- **設定交給插件管理**（2026-11-05 決定）：Start Server 時，插件會自動用 `claude mcp add --scope local` 把 `UnityMCP` 寫進 `~/.claude.json`（這台機器、這個專案資料夾），同時把 `.mcp.json` 清空。不要把設定手動加回 `.mcp.json`，否則會跟插件互相覆蓋。
+- 目前 Server 在 `http://127.0.0.1:8181/mcp`（HTTP，server 名稱 `UnityMCP`；8080 被 Docker 占用）。同資料夾的所有 Claude Code 分頁共用，HTTP 模式支援多個 client 同時連線。
+- 換電腦後設定不會跟著 repo 走，在新機器上 Start Server 一次就會重新註冊。
 - 前置需求：`uv`/`uvx`（裝在 `~/.local/bin`）、Python 3.10+（Homebrew `/opt/homebrew/bin/python3`）。
 - Editor 執行時的 log：`~/Library/Logs/Unity/Editor.log`（MCP 狀態訊息以 `MCP-FOR-UNITY` 開頭）。
-- 注意：本機 Docker 在 `100.64.13.57:8080` 監聽（非 127.0.0.1）。若 Start Server 失敗並回報 port 被占用，先查 `lsof -nP -iTCP:8080 -sTCP:LISTEN`。
-- 使用前要先用 Unity Editor 開著此專案，並在 **Window → MCP for Unity** 按 **Start Server**（或在 Advanced 勾選 *Auto-Start Server on Editor Load*）。狀態顯示 `Connected` 後，在 Claude Code 用 `/mcp` 確認 `UnityMCP` 已連線。
-- **不需要**在該視窗對 Claude Code 按 Configure。它會另外用 `claude mcp add --scope local` 寫一份設定，本專案已經用 `.mcp.json` 了。
+- 若連不上，先查 Server 實際的 port：`grep MCP-FOR-UNITY ~/Library/Logs/Unity/Editor.log | tail`（會印出 `Server ready on http://127.0.0.1:<port>`）。
+- 使用前要先用 Unity Editor 開著此專案，並在 **Window → MCP for Unity** 按 **Start Server**（或在 Advanced 勾選 *Auto-Start Server on Editor Load*）。狀態顯示 `Connected` 後，在 Claude Code 用 `/mcp` 重新連線 `UnityMCP`（Server 啟動前就開的 session 需要 reconnect）。
 - Editor 開著時不能跑上面的 batchmode 檢查；Editor 開著時改用 MCP 讀 Console。
 
 ## 已知問題

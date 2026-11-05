@@ -17,8 +17,8 @@
 5. 設備停拍：停拍 2 秒、保留 Take 進度、期間入鏡照常 NG？
 6. 評星：任務／時間／失誤權重 50／30／20、2 星 60 分、3 星 85 分？時間耗盡未完成鏡頭給 1 星或 0 星？
 
-**C. ~~轉移到 Mac~~：已完成（2026-11-05 確認）。** 開發改在 macOS：專案在 `/Users/mouse76229/Dev Projects/ProjectRolling`，Unity 6000.3.27f1 已裝在 `/Applications/Unity/Hub/Editor/`，Editor 已能開啟專案（0 編譯錯誤）。`uv`/`uvx` 在 `~/.local/bin`；git 認證改用 `osxkeychain`，`gh` 已安裝；herdr 分工已在 workspace `w5` 重建（PM `w5:p1`、Gameplay Designer `w5:p2` codex、Designer `w5:p3`、Engineer `w5:p4`；IT 不建）。`.mcp.json` 是 commit 版（UnityMCP → `localhost:8080/mcp`）。CLAUDE.md 的 Windows 路徑已改成 Mac 路徑。
-   - 未完成：MCP for Unity 的 Server 尚未 Start，所以 UnityMCP 還沒連上（Window → MCP for Unity → Start Server，建議勾選 Auto-Start）。
+**C. ~~轉移到 Mac~~：已完成（2026-11-05 確認）。** 開發改在 macOS：專案在 `/Users/mouse76229/Dev Projects/ProjectRolling`，Unity 6000.3.27f1 已裝在 `/Applications/Unity/Hub/Editor/`，Editor 已能開啟專案（0 編譯錯誤）。`uv`/`uvx` 在 `~/.local/bin`；git 認證改用 `osxkeychain`，`gh` 已安裝；herdr 分工已在 workspace `w5` 重建（PM `w5:p1`、Gameplay Designer `w5:p2` codex、Designer `w5:p3`、Engineer `w5:p4`；IT 不建）。CLAUDE.md 的 Windows 路徑已改成 Mac 路徑。
+   - MCP 已連線（2026-11-05）：Server 在 `127.0.0.1:8181`（8080 被 Docker 占用），Console 0 錯誤。
 
 ## 團隊角色
 | 角色 | 負責 |
@@ -51,10 +51,11 @@
 ## 決策
 - **[已決定 2026-10-31] 遊戲規格以 `GDD_台灣電影拍攝現場.md`（《現場準備！》）為準，但引擎維持 Unity（非 GDD 原寫的 Godot），且做 3D（非 GDD 原寫的 2D）。** 使用者決定。GDD 的多人、觸控、多場景等仍為長期目標；`Docs/Design/GameLoop.md` 需對齊 GDD。
 - **[已決定 2026-10-31] 選項 (a)：升級到 Unity 6 LTS（6000.3.27f1）+ CoplayDev/unity-mcp。** 使用者核准。
-  - MCP 走 HTTP transport + 專案根目錄 `.mcp.json`：所有 Claude Code 分頁可同時共用同一個 Unity Editor（stdio 模式一次只能一個 client）。
+  - MCP 走 HTTP transport：所有 Claude Code 分頁可同時共用同一個 Unity Editor（stdio 模式一次只能一個 client）。（原本用專案根目錄 `.mcp.json`，已被下方 2026-11-05 的決定取代。）
   - 套件鎖定 `v10.3.0` tag，不追 `#main`，避免上游更新突然壞掉；要升級時改 manifest 的 tag。
   - NavMesh 維持舊版烘焙資料；之後若要改場景地形或重新烘焙，改用 AI Navigation 的 NavMeshSurface。
   - 備案：Unity 官方 MCP（`com.unity.ai.assistant`，需 Unity 6）。
+- **[已決定 2026-11-05] MCP 設定交給 MCP for Unity 插件管理。** 使用者決定。插件 Start Server 時自動寫入 `~/.claude.json` 的 local scope（目前 `127.0.0.1:8181`），並清空 `.mcp.json`；`.mcp.json` 以清空狀態 commit，不再手動維護。取代先前「HTTP + 專案根目錄 `.mcp.json`」的做法。
 - 先前評估（2019.4 時）：主流 MCP 都不支援 2019.4，要用 MCP 就得升級；升級風險低（專案小、沒有第三方套件）。
 
 ## 未解問題
