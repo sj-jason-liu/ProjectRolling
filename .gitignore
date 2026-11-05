@@ -9,6 +9,8 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Mm]emoryCaptures/
+/[Uu]ser[Ss]ettings/
+/[Rr]ecordings/
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
@@ -55,6 +57,27 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
+# Unity 6 build profiles / auto-generated assets
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
 # Crashlytics generated file
 crashlytics-build.properties
 
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings (project .mcp.json IS committed)
+.claude/settings.local.json
+
+# Unity 6 generated solution format
+*.slnx
+
+# Windows folder settings
+desktop.ini
