@@ -1,6 +1,6 @@
 # PROGRESS.md — Project Rolling 進度紀錄
 
-> context 被清掉後從這裡接續工作。每次完成任務後更新對應段落。最後更新：2026-11-10（PM）
+> context 被清掉後從這裡接續工作。每次完成任務後更新對應段落。最後更新：2026-11-12（PM）
 
 ## 目前階段
 早期 prototype（單一場景 `Prototype.unity`）。核心移動、撿放物品、路人生成、車輛往返、倒數計時已有雛形；尚無勝負/計分流程。
@@ -50,6 +50,7 @@
   - 套件鎖定 `v10.3.0` tag，不追 `#main`，避免上游更新突然壞掉；要升級時改 manifest 的 tag。
   - NavMesh 維持舊版烘焙資料；之後若要改場景地形或重新烘焙，改用 AI Navigation 的 NavMeshSurface。
   - 備案：Unity 官方 MCP（`com.unity.ai.assistant`，需 Unity 6）。
+- **[已決定 2026-11-12] A10 改雙車道、同時事件以 Cut 為準。** A10 依 CT2 改為兩條分離車道各自停車線、同一控制群組同步攔兩向；入鏡 NG 與 Cut 同時發生以 Cut 為準。仍待確認：入鏡 NG 與設備碰撞同時發生的計數（PM 建議各記一次失誤、只進 NG 整理）。
 - **[已決定 2026-11-10] 第一切片設計全部照建議。** GameLoop.md 6 題（A1–A21）與 CrowdAndTraffic.md CT1–CT6 皆採文件提案／建議預設。
 - **[已決定 2026-11-05] 移動邊界＝地板（含 Road）∩ 攝影機可見範圍。** 使用者決定。
 - **[已決定 2026-11-05] 路人與車流要能依難度與場景限制控制頻率與方向**（規格見 `Docs/Design/CrowdAndTraffic.md`）。
